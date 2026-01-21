@@ -17,8 +17,4 @@ router.get('/inventory/search/:itemid', seachItems);
 router.get('/vendors/search', searchVendor);
 router.get('/employee/search', searchEmployee);
 
-
-
-
-
 export default router;
