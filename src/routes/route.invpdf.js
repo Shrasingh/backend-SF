@@ -28,6 +28,7 @@ function getInvoice(slug) {
 
 router.post("/save", (req, res) => {
     const { slug, form } = req.body;
+    log(31, form)
 
     if (!slug || !form) {
         return res.status(400).json({ error: "Invalid payload" });
@@ -140,7 +141,7 @@ router.get('/pdf/:slug', async (req, res) => {
 
 router.get("/:slug", (req, res) => {
     // log(req.params.slug)
-    const invoice = getInvoice(req.params.slug); log('invoice', invoice.sellerNames)
+    const invoice = getInvoice(req.params.slug); log('invoice', invoice?.sellerNames)
     if (!invoice) {
         return res.status(404).json({ error: "Invoice not found" });
     }
