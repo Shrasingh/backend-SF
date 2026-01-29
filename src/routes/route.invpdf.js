@@ -57,7 +57,7 @@ router.get("/:slug", (req, res) => {
    - MUST be defined before `/:slug`
 ================================================== */
 // full route /api/invoice/pdf/:slug
-router.get('/pdf/:slug', async (req, res) => {
+router.get('/pdf/old/:slug', async (req, res) => {
     const { slug } = req.params; console.log(slug);
     let browser;
 
@@ -152,7 +152,7 @@ router.get('/pdf/:slug', async (req, res) => {
     }
 });
 
-router.get("/pdf/test/:slug", async (req, res) => {
+router.get("/pdf/:slug", async (req, res) => {
     const { slug } = req.params;
 
     const invoice = getInvoice(slug);
@@ -164,14 +164,14 @@ router.get("/pdf/test/:slug", async (req, res) => {
 
     let targetFolderId;
     switch (storeCode) {
-        case "s1":
-            targetFolderId = process.env.FOLDER_100;
+        case "S1":
+            targetFolderId = process.env.TEST_100;
             break;
-        case "s2":
-            targetFolderId = process.env.FOLDER_200;
+        case "S2":
+            targetFolderId = process.env.TEST_200;
             break;
         default:
-            targetFolderId = process.env.FOLDER_FALLBACK;
+            targetFolderId = process.env.FOLDER_ID_2;
     }
 
     if (!targetFolderId) {
@@ -211,9 +211,6 @@ router.get("/pdf/test/:slug", async (req, res) => {
         });
     }
 });
-
-
-
 
 
 export default router;

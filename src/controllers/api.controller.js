@@ -52,6 +52,8 @@ export async function searchEmployee(req, res) {
   example http://localhost:5000/api/inventory/search?q=1127886  
 */
 
+
+
 // old query with local mysql tables
 export async function seachItems_(req, res) {
   try {
