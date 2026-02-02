@@ -3,7 +3,7 @@ import { runMysql, runSql } from "../config/db.js";
 /* 
   syntax: localhost:3000/api/vendors/search?q=alex
   API LOGIN: localhost:3000/api/vendors/search?q=<name, custid, email, contact, address>
-*/
+ */
 
 export async function searchVendor(req, res) {
   try {
@@ -21,7 +21,7 @@ export async function searchVendor(req, res) {
   syntax: http://localhost:5000/api/employee/search?q=<emp name>
   http://localhost:5000/api/employee/search?q=amy
   http://localhost:5000/api/employee/search?q=a
-*/
+ */
 export async function searchEmployee(req, res) {
   try {
     const q = (req.query.q || '').trim(); //log(q);
@@ -50,7 +50,7 @@ export async function searchEmployee(req, res) {
 
   http://localhost:5000/api/inventory/search?q=itemid
   example http://localhost:5000/api/inventory/search?q=1127886  
-*/
+ */
 
 
 
@@ -237,7 +237,7 @@ export async function seachItems(req, res) {
 /* 
   API: localhost:3000/api/customers/search?q=alex
   API LOGIN: localhost:3000/api/customers/search?q=<name, custid, email, contact, address>
-*/
+ */
 export async function searchCustomer(req, res) {
   try {
     const q = (req.query.q || '').trim(); //log(q);
@@ -300,4 +300,3 @@ export async function zipCodeDeleveires(req, res){
     log(error);
   }
 }
-
