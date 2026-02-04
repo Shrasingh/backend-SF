@@ -165,10 +165,10 @@ router.get("/pdf/:slug", async (req, res) => {
     let targetFolderId;
     switch (storeCode) {
         case "S1":
-            targetFolderId = process.env.TEST_100;
+            targetFolderId = process.env.FOLDER_100;
             break;
         case "S2":
-            targetFolderId = process.env.TEST_200;
+            targetFolderId = process.env.FOLDER_200;
             break;
         default:
             targetFolderId = process.env.FOLDER_ID_2;
@@ -186,7 +186,17 @@ router.get("/pdf/:slug", async (req, res) => {
         // ✅ ONE line PDF generation
         const pdfBuffer = await generatePdfFromUrl(url);
 
-        // ✅ Upload
+        // Default upload to Salesform_PDF folder in googledrive public
+        uploadPdfToDrive(
+            pdfBuffer,
+            `${slug}.pdf`,
+            process.env.FOLDER_ID_2
+        ).catch(err => {
+            console.error("Drive upload failed:", err.message);
+        });
+
+
+        // ✅ Upload by location
         uploadPdfToDrive(
             pdfBuffer,
             `${slug}.pdf`,
