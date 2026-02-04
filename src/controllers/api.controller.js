@@ -28,7 +28,7 @@ export async function searchEmployee(req, res) {
     let sql = `
       select 
         e.name, e.rv_code, s.name as store
-      from employees e join store s on s.id = e.store
+      from employees e left join store s on s.id = e.store
       where e.is_active = true and e.name like '%${q}%';
     `;
     let rows = await runMysql(sql, [q]);
