@@ -8,8 +8,9 @@ import { runMysql, runSql } from "../config/db.js";
 export async function searchVendor(req, res) {
   try {
     const q = (req.query.q || '').trim(); //log(q);
-    const sql = `select code from vendors where code like '${q}%';`;
-    const rows = await runMysql(sql);
+    const sql = `select code from vendors where code like ? order by code asc ;`;
+    let values = [`${q}%`]
+    const rows = await runMysql(sql, values);
     res.json({ ok: true, count: rows.length, data: rows });
   } catch (error) {
     console.error('Items search error:', error);
@@ -117,7 +118,7 @@ SELECT
     a.[item_desc]           AS [sku],
     a.[item_desc_2]         AS [description],
     a.[Available (Loc#1)]   AS [s1],
-    a.[Available (Loc#1)]   AS [s2],
+    a.[Available (Loc#2)]   AS [s2],
     a.[Available (Loc#999)] AS [_999],
     b.[item_prc_1]          AS [item_price],
     c.[ItemStatus]          AS [item_status]
@@ -148,8 +149,9 @@ export async function seachItems(req, res) {
           a.[item_id_1]           AS [itemId],
           a.[item_desc]           AS [sku],
           a.[item_desc_2]         AS [description],
+          b.[item_cat]            AS [CAT],
           a.[Available (Loc#1)]   AS [s1],
-          a.[Available (Loc#1)]   AS [s2],
+          a.[Available (Loc#2)]   AS [s2],
           a.[Available (Loc#999)] AS [999],
           a.[Available (Loc#1)] + a.[Available (Loc#1)] + a.[Available (Loc#999)] as [total_avl],
           b.[item_prc_1]          AS [item_price],
@@ -178,8 +180,9 @@ export async function seachItems(req, res) {
           a.[item_id_1]           AS [itemId],
           a.[item_desc]           AS [sku],
           a.[item_desc_2]         AS [description],
+          b.[item_cat]            AS [CAT],
           a.[Available (Loc#1)]   AS [s1],
-          a.[Available (Loc#1)]   AS [s2],
+          a.[Available (Loc#2)]   AS [s2],
           a.[Available (Loc#999)] AS [999],
           a.[Available (Loc#1)] + a.[Available (Loc#1)] + a.[Available (Loc#999)] as [total_avl],
           b.[item_prc_1]          AS [item_price],
