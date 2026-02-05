@@ -241,7 +241,7 @@ export async function seachItems(req, res) {
   API: localhost:3000/api/customers/search?q=alex
   API LOGIN: localhost:3000/api/customers/search?q=<name, custid, email, contact, address>
  */
-export async function searchCustomer(req, res) {
+export async function searchCustomer___(req, res) {
   try {
     const q = (req.query.q || '').trim(); //log(q);
 
@@ -250,7 +250,7 @@ export async function searchCustomer(req, res) {
     }
 
     // Build the wildcard once and reuse
-    const like = `${q}%`;
+    const like = `%${q}%`;
 
     const sql = `
       SELECT TOP (20)
@@ -287,6 +287,8 @@ export async function searchCustomer(req, res) {
     res.status(500).json({ ok: false, message: 'Internal Server Error' });
   }
 };
+
+
 
 
 export async function zipCodeDeleveires(req, res){
