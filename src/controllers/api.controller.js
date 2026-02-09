@@ -1,4 +1,5 @@
 import { runMysql, runSql } from "../config/db.js";
+const log = console.log;
 
 /* 
   syntax: localhost:3000/api/vendors/search?q=alex
@@ -288,6 +289,7 @@ export async function searchCustomer__(req, res) {
   }
 };
 
+const cache = new Map();
 export async function searchCustomer(req, res) {
   try {
     const q = (req.query.q || '').trim();
