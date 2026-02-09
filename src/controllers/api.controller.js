@@ -296,7 +296,7 @@ export async function searchCustomer(req, res) {
       return res.status(400).json({ ok: false, message: "Query parameter 'q' is required." });
     }
 
-    const startsWithLike = `${q}%`;
+    const like = `${q}%`;
     const containsLike = `%${q}%`;
 
     const sql = `
@@ -328,18 +328,132 @@ export async function searchCustomer(req, res) {
     `;
 
     const rows = await runSql(sql, [
-      startsWithLike,   // cust_id
+      like,             // cust_id
       containsLike,     // cust_name (CONTAINS search)
-      startsWithLike,   // address_1
-      startsWithLike,   // address_2
-      startsWithLike,   // email
-      startsWithLike,   // phone_1
-      startsWithLike    // phone_2
+      like,             // address_1
+      like,             // address_2
+      like,             // email
+      like,             // phone_1
+      like              // phone_2
     ]);
     res.json({ ok: true, count: rows.length, data: rows });
   } catch (err) {
     console.error('Customer search error:', err);
     res.status(500).json({ ok: false, message: 'Internal Server Error' });
+  }
+}
+
+export async function searchCustomerAdv(req, res) {
+  try {
+    const q = (req.query.q || '').trim();
+    const zip = (req.query.zip || '').trim();
+
+    if (!q && !zip)
+      return res.status(400).json({ ok:false, message:"q or zip required" });
+
+    if (q && q.length < 2 && !zip)
+      return res.json({ ok:true, count:0, data:[] });
+
+    const cacheKey = `${q.toLowerCase()}|${zip}`; log(cacheKey);
+
+    if (cache.has(cacheKey))
+      return res.json(cache.get(cacheKey));
+
+    const numeric = /^\d+$/.test(q);
+
+    let sql = `
+      SELECT TOP (100)
+          TRY_CAST(c.cust_id AS INT) AS cust_id,
+          n.cust_name,
+          c.cust_st_1 AS address_1,
+          c.cust_st_2 AS address_2,
+          c.cust_city AS city,
+          c.cust_state AS state,
+          c.cust_zip_cod AS zipcode,
+          c.cust_email AS email,
+          c.cust_phone_no AS phone_1,
+          c.cust_phone_no_2 AS phone_2
+      FROM dbo.CustMaster c
+
+      CROSS APPLY (
+          SELECT LTRIM(RTRIM(REPLACE(
+              SUBSTRING(c.cust_nam, CHARINDEX('|', c.cust_nam)+2, 50),
+              ',', ''
+          ))) AS cust_name
+      ) n
+      WHERE 1=1
+    `;
+
+    const params = [];
+
+    // Zip filter
+    if (zip) {
+      sql += ` AND c.cust_zip_cod = ? `;
+      params.push(zip);
+    }
+
+    // Token Search
+    if (q) {
+
+      const tokens = q
+        .toLowerCase()
+        .split(/\s+/)
+        .filter(t => t.length >= 2);
+
+      if (tokens.length) {
+
+        const parts = [];
+
+        // Fast numeric match
+        if (numeric) {
+          parts.push(`c.cust_id = ?`);
+          params.push(q);
+        }
+
+        // Token match on name
+        const tokenSql = tokens
+          .map(()=>`n.cust_name LIKE ?`)
+          .join(' AND ');
+
+        parts.push(`(${tokenSql})`);
+        tokens.forEach(t => params.push(`%${t}%`));
+
+        // Other fields (fallback broad match)
+        const like = `%${q}%`;
+        const startsWithLike = `${q}%`;
+        const containsLike = `%${q}%`;
+        parts.push(`(
+            c.cust_st_1 LIKE ?
+            OR c.cust_st_2 LIKE ?
+            OR c.cust_email LIKE ?
+            OR c.cust_phone_no LIKE ?
+            OR c.cust_phone_no_2 LIKE ?
+        )`);
+
+        params.push(startsWithLike, startsWithLike, startsWithLike, startsWithLike, startsWithLike);
+
+        sql += ` AND (${parts.join(' OR ')})`;
+      }
+    }
+
+    sql += ` ORDER BY n.cust_name ASC, c.cust_id ASC`;
+
+    const rows = await runSql(sql, params);
+    const result = { ok:true, count:rows.length, data:rows };
+
+    // Cache store
+    cache.set(cacheKey, result);
+    setTimeout(()=>cache.delete(cacheKey), 10000);
+
+    // Memory guard
+    if (cache.size > 200)
+      cache.clear();
+
+    res.json(result);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok:false });
   }
 }
 
